@@ -24,7 +24,6 @@ public class ThirdPersonCamera : MonoBehaviour
     // Minimum angle for vertical rotation
     private float yRotMin = -60f;
 
-    // Start is called before the first frame update
     void Start()
     {
         initPos = transform.position;
