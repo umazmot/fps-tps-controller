@@ -8,16 +8,18 @@ using UnityEngine;
 /// </summary>
 public class ThirdPersonController : MonoBehaviour
 {
-    // Moving Speed
+    // Moving speed
     public float speed = 5f;
     // Sprint speed
     public float sprintSpeed = 10f;
+    // Jump force
+    public float jumpForce = 8f;
     // Rigidbody
     private Rigidbody rb;
     // Fly mode
     private bool isFlying = false;
 
-    private void Start()
+    void Start()
     {
         rb = GetComponent<Rigidbody>();
     }
@@ -30,17 +32,23 @@ public class ThirdPersonController : MonoBehaviour
             isFlying = !isFlying;
         }
 
+        if (Input.GetKeyDown(KeyCode.Space) && !isFlying && Physics.Raycast(transform.position + Vector3.up, Vector3.down, 1.1f))
+        {
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        }
+
         float xIn = Input.GetAxis("Horizontal");
         float zIn = Input.GetAxis("Vertical");
 
         // Idle state
         if (xIn == 0f && zIn == 0f)
         {
+            // Reset the non-zero Y velocity due to colliding with something in fly mode.
             if (isFlying)
             {
-                // Reset the non-zero Y velocity due to colliding with something in fly mode.
                 rb.velocity = Vector3.zero;
             }
+
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0f, transform.rotation.eulerAngles.y, 0f), 0.1f);
             return;
         }
