@@ -18,6 +18,8 @@ public class ThirdPersonController : MonoBehaviour
     private Rigidbody rb;
     // Fly mode
     private bool isFlying = false;
+    // Ray range
+    private float rayRange = 1.1f;
 
     void Start()
     {
@@ -32,7 +34,7 @@ public class ThirdPersonController : MonoBehaviour
             isFlying = !isFlying;
         }
 
-        if (Input.GetKeyDown(KeyCode.Space) && !isFlying && Physics.Raycast(transform.position + Vector3.up, Vector3.down, 1.1f))
+        if (Input.GetKeyDown(KeyCode.Space) && !isFlying && Physics.Raycast(transform.position + Vector3.up, Vector3.down, rayRange))
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
