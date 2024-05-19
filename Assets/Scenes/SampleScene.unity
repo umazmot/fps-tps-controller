@@ -703,7 +703,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 1726050148}
-  sensitivity: 1000
+  rotSensitivity: 1000
 --- !u!1 &1001018254
 GameObject:
   m_ObjectHideFlags: 0
