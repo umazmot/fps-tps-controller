@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 /// <summary>
@@ -40,18 +39,18 @@ public class ThirdPersonCamera : MonoBehaviour
 
     void LateUpdate()
     {
-        distance += Input.GetAxis("Mouse ScrollWheel") * zoomSensitivity * Time.deltaTime;
         Vector3 rayDir = target.transform.position - transform.position;
-        Debug.DrawRay(transform.position, rayDir, Color.red, rayDir.magnitude);
-        if (Physics.Raycast(transform.position, rayDir, out RaycastHit hit, rayDir.magnitude))
+
+        // Auto zoom if something is between the camera and the player
+        if (Physics.Raycast(transform.position, rayDir, out RaycastHit hit, rayDir.magnitude) && !hit.collider.transform.root.CompareTag("Player"))
         {
-            if (!hit.collider.transform.root.CompareTag("Player"))
-            {
-                distance -= hit.distance / transform.position.magnitude;
-            }
+            distance -= hit.distance / transform.position.magnitude;
+        }
+        else
+        {
+            distance += Input.GetAxis("Mouse ScrollWheel") * zoomSensitivity * Time.deltaTime;
         }
         distance = Mathf.Clamp(distance, minDistance, maxDistance);
-        Debug.Log(distance);
 
         xRot += Input.GetAxis("Mouse X") * rotSensitivity * Time.deltaTime;
         yRot -= Input.GetAxis("Mouse Y") * rotSensitivity * Time.deltaTime;
