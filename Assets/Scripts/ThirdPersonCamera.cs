@@ -11,6 +11,8 @@ public class ThirdPersonCamera : MonoBehaviour
 {
     // Player object to be followed
     public GameObject target;
+    // FPS mode or TPS mode
+    private bool isFPS = false;
     // Initial position
     private Vector3 initPos;
     // Distance from the target i.e. zoom scale
@@ -31,30 +33,43 @@ public class ThirdPersonCamera : MonoBehaviour
     private float yRotMin = -60f;
     // Rotation sensitivity
     private float rotSensitivity = 1000f;
-    // Offset for the center of the target
-    private Vector3 offset = Vector3.up;
+    // Offset for the center of the target in TPS mode
+    private Vector3 offsetTPS = Vector3.up;
+    // Offset for the center of the target in FPS mode
+    private Vector3 offsetFPS = Vector3.up * 1.5f;
 
     void Start()
     {
-        initPos = transform.position - offset;
+        initPos = transform.position - offsetTPS;
     }
 
     void LateUpdate()
     {
-        Vector3 targetPos = target.transform.position + offset;
-        Vector3 rayDir = targetPos - transform.position;
+        if (Input.GetKeyDown(KeyCode.LeftAlt))
+        {
+            isFPS = !isFPS;
+            target.transform.localScale = isFPS ? Vector3.zero : Vector3.one;
+            distance = isFPS ? 0f : 1f;
+        }
 
-        // Auto zoom if something is between the camera and the player
-        if (Physics.Raycast(transform.position, rayDir, out RaycastHit hit, rayDir.magnitude)
-            && !hit.collider.transform.root.CompareTag("Player"))
+        Vector3 targetPos = target.transform.position + (isFPS ? offsetFPS : offsetTPS);
+
+        if (!isFPS)
         {
-            distance -= hit.distance / transform.position.magnitude;
+            Vector3 rayDir = targetPos - transform.position;
+
+            // Auto zoom if something is between the camera and the player
+            if (Physics.Raycast(transform.position, rayDir, out RaycastHit hit, rayDir.magnitude)
+                && !hit.collider.transform.root.CompareTag("Player"))
+            {
+                distance -= hit.distance / transform.position.magnitude;
+            }
+            else
+            {
+                distance += Input.GetAxis("Mouse ScrollWheel") * zoomSensitivity * Time.deltaTime;
+            }
+            distance = Mathf.Clamp(distance, minDistance, maxDistance);
         }
-        else
-        {
-            distance += Input.GetAxis("Mouse ScrollWheel") * zoomSensitivity * Time.deltaTime;
-        }
-        distance = Mathf.Clamp(distance, minDistance, maxDistance);
 
         xRot += Input.GetAxis("Mouse X") * rotSensitivity * Time.deltaTime;
         yRot -= Input.GetAxis("Mouse Y") * rotSensitivity * Time.deltaTime;
