@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Third Person Controller<br/>
+/// Player Controller<br/>
 /// Aattach this script to the player character object.
 /// </summary>
-public class ThirdPersonController : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
     // Moving speed
     public float speed = 5f;

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Third Person Camera<br/>
+/// First/Third Person Camera<br/>
 /// Aattach this script to the camera object.
 /// Then set the player character to the field "target."
 /// </summary>
-public class ThirdPersonCamera : MonoBehaviour
+public class XPersonCamera : MonoBehaviour
 {
     // Player object to be followed
     public GameObject target;
