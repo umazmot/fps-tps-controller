@@ -53,14 +53,12 @@ public class XPersonCamera : MonoBehaviour
         }
 
         Vector3 targetPos = target.transform.position + (isFPS ? offsetFPS : offsetTPS);
+        RaycastHit hit;
 
         if (!isFPS)
         {
-            Vector3 rayDir = targetPos - transform.position;
-
-            // Auto zoom if something is between the camera and the player
-            if (Physics.Raycast(transform.position, rayDir, out RaycastHit hit, rayDir.magnitude)
-                && !hit.collider.transform.root.CompareTag("Player"))
+            // Auto zoom
+            if (IsBlocked(transform.position, targetPos, out hit))
             {
                 distance -= hit.distance / transform.position.magnitude;
             }
@@ -71,12 +69,38 @@ public class XPersonCamera : MonoBehaviour
             distance = Mathf.Clamp(distance, minDistance, maxDistance);
         }
 
-        xRot += Input.GetAxis("Mouse X") * rotSensitivity * Time.deltaTime;
-        yRot -= Input.GetAxis("Mouse Y") * rotSensitivity * Time.deltaTime;
-        yRot = Mathf.Clamp(yRot, yRotMin, yRotMax);
+        float xIn = Input.GetAxis("Mouse X") * rotSensitivity * Time.deltaTime;
+        Vector3 xShift = targetPos + Quaternion.Euler(yRot, xRot + xIn, 0f) * (distance * initPos);
+        if (!isFPS && IsBlocked(xShift, targetPos, out hit))
+        {
+            distance -= hit.distance / xShift.magnitude;
+        }
+        else
+        {
+            xRot += xIn;
+        }
+
+        float yIn = Input.GetAxis("Mouse Y") * rotSensitivity * Time.deltaTime;
+        Vector3 yShift = targetPos + Quaternion.Euler(Mathf.Clamp(yRot - yIn, yRotMin, yRotMax), xRot, 0f) * (distance * initPos);
+        if (!isFPS && IsBlocked(yShift, targetPos, out hit))
+        {
+            distance -= hit.distance / yShift.magnitude;
+        }
+        else
+        {
+            yRot -= yIn;
+            yRot = Mathf.Clamp(yRot, yRotMin, yRotMax);
+        }
 
         Quaternion rot = Quaternion.Euler(yRot, xRot, 0f);
         Vector3 pos = targetPos + rot * (distance * initPos);
         transform.SetPositionAndRotation(pos, rot);
+    }
+
+    // Returns true is something is between the camera and the player
+    private bool IsBlocked(Vector3 camera, Vector3 player, out RaycastHit hit)
+    {
+        Vector3 dir = player - camera;
+        return Physics.Raycast(camera, dir, out hit, dir.magnitude) && !hit.collider.transform.root.CompareTag("Player");
     }
 }

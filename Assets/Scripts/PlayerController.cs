@@ -34,8 +34,7 @@ public class PlayerController : MonoBehaviour
             isFlying = !isFlying;
         }
 
-        if (Input.GetKeyDown(KeyCode.Space) && !isFlying
-            && Physics.Raycast(transform.position + Vector3.up, Vector3.down, rayRange))
+        if (Input.GetKeyDown(KeyCode.Space) && !isFlying && Physics.Raycast(transform.position + Vector3.up, Vector3.down, rayRange))
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
@@ -52,10 +51,7 @@ public class PlayerController : MonoBehaviour
                 rb.velocity = Vector3.zero;
             }
 
-            transform.rotation = Quaternion.Slerp(
-                transform.rotation,
-                Quaternion.Euler(0f, transform.rotation.eulerAngles.y, 0f),
-                0.1f);
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0f, transform.rotation.eulerAngles.y, 0f), 0.1f);
             return;
         }
 
