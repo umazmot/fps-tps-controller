@@ -31,18 +31,22 @@ public class ThirdPersonCamera : MonoBehaviour
     private float yRotMin = -60f;
     // Rotation sensitivity
     private float rotSensitivity = 1000f;
+    // Offset for the center of the target
+    private Vector3 offset = Vector3.up;
 
     void Start()
     {
-        initPos = transform.position;
+        initPos = transform.position - offset;
     }
 
     void LateUpdate()
     {
-        Vector3 rayDir = target.transform.position - transform.position;
+        Vector3 targetPos = target.transform.position + offset;
+        Vector3 rayDir = targetPos - transform.position;
 
         // Auto zoom if something is between the camera and the player
-        if (Physics.Raycast(transform.position, rayDir, out RaycastHit hit, rayDir.magnitude) && !hit.collider.transform.root.CompareTag("Player"))
+        if (Physics.Raycast(transform.position, rayDir, out RaycastHit hit, rayDir.magnitude)
+            && !hit.collider.transform.root.CompareTag("Player"))
         {
             distance -= hit.distance / transform.position.magnitude;
         }
@@ -57,7 +61,7 @@ public class ThirdPersonCamera : MonoBehaviour
         yRot = Mathf.Clamp(yRot, yRotMin, yRotMax);
 
         Quaternion rot = Quaternion.Euler(yRot, xRot, 0f);
-        Vector3 pos = target.transform.position + rot * (distance * initPos);
+        Vector3 pos = targetPos + rot * (distance * initPos);
         transform.SetPositionAndRotation(pos, rot);
     }
 }
