@@ -11,8 +11,8 @@ public class XPersonCamera : MonoBehaviour
 {
     // Player object to be followed
     public GameObject target;
-    // FPS mode or TPS mode
-    private bool isFPS = false;
+    // TPS mode or FPS mode
+    private bool isTPS = true;
     // Initial position
     private Vector3 initPos;
     // Distance from the target i.e. zoom scale
@@ -47,57 +47,38 @@ public class XPersonCamera : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.LeftAlt))
         {
-            isFPS = !isFPS;
-            target.transform.localScale = isFPS ? Vector3.zero : Vector3.one;
-            distance = isFPS ? 0f : 1f;
-        }
-
-        Vector3 targetPos = target.transform.position + (isFPS ? offsetFPS : offsetTPS);
-        RaycastHit hit;
-
-        if (!isFPS)
-        {
-            // Auto zoom
-            if (IsBlocked(transform.position, targetPos, out hit))
-            {
-                distance -= hit.distance / transform.position.magnitude;
-            }
-            else
-            {
-                distance += Input.GetAxis("Mouse ScrollWheel") * zoomSensitivity * Time.deltaTime;
-            }
-            distance = Mathf.Clamp(distance, minDistance, maxDistance);
+            isTPS = !isTPS;
+            target.transform.localScale = isTPS ? Vector3.one : Vector3.zero;
+            distance = isTPS ? 1f : 0f;
         }
 
         float xIn = Input.GetAxis("Mouse X") * rotSensitivity * Time.deltaTime;
-        Vector3 xShift = targetPos + Quaternion.Euler(yRot, xRot + xIn, 0f) * (distance * initPos);
-        if (!isFPS && IsBlocked(xShift, targetPos, out hit))
+        float yIn = Input.GetAxis("Mouse Y") * rotSensitivity * Time.deltaTime;
+        float scrollIn = Input.GetAxis("Mouse ScrollWheel") * zoomSensitivity * Time.deltaTime;
+
+        Vector3 targetPos = target.transform.position + (isTPS ? offsetTPS : offsetFPS);
+        Quaternion shiftRot = Quaternion.Euler(Mathf.Clamp(yRot - yIn, yRotMin, yRotMax), xRot + xIn, 0f);
+        float shiftDistance = Mathf.Clamp(distance + scrollIn, minDistance, maxDistance);
+        Vector3 shiftPos = targetPos + shiftRot * (shiftDistance * initPos);
+
+        // Auto zoom in
+        if (isTPS && IsBlocked(shiftPos, targetPos, out RaycastHit hit))
         {
-            distance -= hit.distance / xShift.magnitude;
+            distance -= hit.distance / shiftPos.magnitude;
         }
         else
         {
             xRot += xIn;
+            yRot = Mathf.Clamp(yRot - yIn, yRotMin, yRotMax);
         }
-
-        float yIn = Input.GetAxis("Mouse Y") * rotSensitivity * Time.deltaTime;
-        Vector3 yShift = targetPos + Quaternion.Euler(Mathf.Clamp(yRot - yIn, yRotMin, yRotMax), xRot, 0f) * (distance * initPos);
-        if (!isFPS && IsBlocked(yShift, targetPos, out hit))
-        {
-            distance -= hit.distance / yShift.magnitude;
-        }
-        else
-        {
-            yRot -= yIn;
-            yRot = Mathf.Clamp(yRot, yRotMin, yRotMax);
-        }
+        distance = isTPS ? Mathf.Clamp(distance + scrollIn, minDistance, maxDistance) : 0f;
 
         Quaternion rot = Quaternion.Euler(yRot, xRot, 0f);
         Vector3 pos = targetPos + rot * (distance * initPos);
         transform.SetPositionAndRotation(pos, rot);
     }
 
-    // Returns true is something is between the camera and the player
+    // Returns true if something is between the camera and the player.
     private bool IsBlocked(Vector3 camera, Vector3 player, out RaycastHit hit)
     {
         Vector3 dir = player - camera;
