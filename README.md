@@ -9,3 +9,6 @@ This is FPS and TPS character controller. Attach CharacterController.cs to the p
 - Alt/Opt: switches to FPS/TPS mode
 - Mouse move: camera rotation
 - Mouse scroll: zoom in/out
+
+
+https://github.com/user-attachments/assets/0cc13562-6a7d-4bdd-ae76-85666856cbcf
